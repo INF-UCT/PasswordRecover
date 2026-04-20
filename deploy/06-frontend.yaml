@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: chpassword
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: REEMPLAZAR/chpassword-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: chpassword-config
+                  key: APP_BASE_URL
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: chpassword
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 3000
+      targetPort: 3000

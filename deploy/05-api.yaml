@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: chpassword
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: REEMPLAZAR/chpassword-api:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: chpassword-config
+          env:
+            - name: LDAP_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chpassword-secret
+                  key: LDAP_BIND_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chpassword-secret
+                  key: REDIS_PASSWORD
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chpassword-secret
+                  key: SMTP_PASSWORD
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: chpassword
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 8080
+      targetPort: 8080

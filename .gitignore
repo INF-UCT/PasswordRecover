@@ -1,0 +1,5 @@
+# Variables de entorno
+.env
+
+# Secrets de Kubernetes
+deploy/01-secret.yaml

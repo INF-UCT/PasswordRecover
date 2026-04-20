@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chpassword-config
+  namespace: chpassword
+data:
+  APP_PORT: "8080"
+  APP_BASE_URL: "https://chpass.inf.uct.cl"
+  APP_FRONTEND_URL: "https://chpass.inf.uct.cl"
+  APP_TOKEN_TTL_MINUTES: "10"
+
+  LDAP_HOST: "ldap.inf.uct.cl"
+  LDAP_PORT: "389"
+  LDAP_USE_TLS: "false"
+  LDAP_BIND_DN: "cn=admin,dc=inf,dc=uct,dc=cl"
+  LDAP_BASE_DN: "dc=inf,dc=uct,dc=cl"
+
+  REDIS_URL: "redis://redis:6379"
+
+  SMTP_HOST: "smtp.inf.uct.cl"
+  SMTP_PORT: "465"
+  SMTP_USER: "noreply@inf.uct.cl"
+  SMTP_FROM: "noreply@inf.uct.cl"
