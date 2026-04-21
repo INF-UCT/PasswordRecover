@@ -4,7 +4,7 @@ metadata:
   name: api
   namespace: chpassword
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: api
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: REEMPLAZAR/chpassword-api:latest
+          image: 0mellado/chpassword-backend:latest
           ports:
             - containerPort: 8080
           envFrom:
@@ -28,10 +28,7 @@ spec:
                   name: chpassword-secret
                   key: LDAP_BIND_PASSWORD
             - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: chpassword-secret
-                  key: REDIS_PASSWORD
+              value: ""
             - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:

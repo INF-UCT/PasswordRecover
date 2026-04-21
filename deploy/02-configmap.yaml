@@ -9,15 +9,15 @@ data:
   APP_FRONTEND_URL: "https://chpass.inf.uct.cl"
   APP_TOKEN_TTL_MINUTES: "10"
 
-  LDAP_HOST: "ldap.inf.uct.cl"
+  LDAP_HOST: "ldap-external.dvizama.svc.cluster.local"
   LDAP_PORT: "389"
   LDAP_USE_TLS: "false"
   LDAP_BIND_DN: "cn=admin,dc=inf,dc=uct,dc=cl"
   LDAP_BASE_DN: "dc=inf,dc=uct,dc=cl"
 
-  REDIS_URL: "redis://redis:6379"
+  REDIS_URL: "redis://redis.chpassword.svc.cluster.local:6379"
 
-  SMTP_HOST: "smtp.inf.uct.cl"
+  SMTP_HOST: "newen.inf.uct.cl"
   SMTP_PORT: "465"
-  SMTP_USER: "noreply@inf.uct.cl"
-  SMTP_FROM: "noreply@inf.uct.cl"
+  SMTP_USER: "admin@inf.uct.cl"
+  SMTP_FROM: "admin@inf.uct.cl"

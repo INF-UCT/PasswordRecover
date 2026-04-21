@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: chpassword
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -15,32 +15,31 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: REEMPLAZAR/chpassword-frontend:latest
+          image: 0mellado/chpassword-frontend:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 80
           env:
-            - name: ORIGIN
-              valueFrom:
-                configMapKeyRef:
-                  name: chpassword-config
-                  key: APP_BASE_URL
+            - name: API_URL
+              value: "http://api.chpassword.svc.cluster.local:8080"
           livenessProbe:
-            tcpSocket:
-              port: 3000
+            httpGet:
+              path: /
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 15
           readinessProbe:
-            tcpSocket:
-              port: 3000
+            httpGet:
+              path: /
+              port: 80
             initialDelaySeconds: 3
             periodSeconds: 10
           resources:
             requests:
-              cpu: 50m
-              memory: 64Mi
+              cpu: 20m
+              memory: 32Mi
             limits:
-              cpu: 500m
-              memory: 256Mi
+              cpu: 200m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -51,5 +50,5 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 3000
-      targetPort: 3000
+    - port: 80
+      targetPort: 80

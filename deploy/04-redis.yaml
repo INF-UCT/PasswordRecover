@@ -1,5 +1,6 @@
+---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: redis
   namespace: chpassword
@@ -19,9 +20,6 @@ spec:
           ports:
             - containerPort: 6379
           args: ["--appendonly", "yes"]
-          volumeMounts:
-            - name: data
-              mountPath: /data
           livenessProbe:
             exec:
               command: ["redis-cli", "ping"]
@@ -36,13 +34,18 @@ spec:
             requests:
               cpu: 50m
               memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 256Mi
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: redis-data
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        storageClassName: csi-cephfs-sc
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
@@ -50,8 +53,9 @@ metadata:
   name: redis
   namespace: chpassword
 spec:
-  selector:
-    app: redis
+  clusterIP: None
   ports:
     - port: 6379
       targetPort: 6379
+  selector:
+    app: redis

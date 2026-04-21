@@ -4,9 +4,15 @@ metadata:
   name: chpassword
   namespace: chpassword
   annotations:
+    external-dns.alpha.kubernetes.io/hostname: chpass.inf.uct.cl
+    external-dns.alpha.kubernetes.io/target: proxy.inf.uct.cl
     nginx.ingress.kubernetes.io/proxy-body-size: "1m"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - chpass.inf.uct.cl
+      secretName: inf-uct-cl-tls
   rules:
     - host: chpass.inf.uct.cl
       http:
@@ -15,10 +21,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nginx
+                name: frontend
                 port:
                   number: 80
-  tls:
-    - hosts:
-        - chpass.inf.uct.cl
-      secretName: chpassword-tls
