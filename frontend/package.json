@@ -8,6 +8,9 @@
     "build": "vite build",
     "preview": "vite preview --host"
   },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.0",
     "@sveltejs/kit": "^2.16.0",

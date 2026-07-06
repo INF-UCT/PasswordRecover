@@ -1,5 +1,11 @@
 <script>
 	import { page } from '$app/stores';
+	import {
+		confirmResetSchema,
+		formatZodErrors,
+		formatBackendErrors,
+		passwordRequirements
+	} from '$lib/validators.js';
 
 	const token = $derived($page.params.token);
 
@@ -10,7 +16,12 @@
 	let tokenValid = $state(false);
 	let expiresAt = $state('');
 	let done = $state(false);
-	let error = $state('');
+	let fieldErrors = $state({});
+	let generalError = $state('');
+
+	const requirementsState = $derived(
+		passwordRequirements.map((req) => ({ ...req, met: req.test(newPassword) }))
+	);
 
 	$effect(() => {
 		if (token) validateToken();
@@ -18,7 +29,7 @@
 
 	async function validateToken() {
 		validating = true;
-		error = '';
+		generalError = '';
 		try {
 			const res = await fetch(`/api/v1/password-reset/${token}`);
 			if (res.ok) {
@@ -26,14 +37,14 @@
 				tokenValid = true;
 				expiresAt = body.data?.expires_at ?? '';
 			} else if (res.status === 410) {
-				error = 'Este enlace ya fue utilizado o ha vencido.';
+				generalError = 'Este enlace ya fue utilizado o ha vencido.';
 			} else if (res.status === 404) {
-				error = 'El enlace no es válido.';
+				generalError = 'El enlace no es válido.';
 			} else {
-				error = 'Error al verificar el enlace. Intenta más tarde.';
+				generalError = 'Error al verificar el enlace. Intenta más tarde.';
 			}
 		} catch {
-			error = 'No se pudo conectar con el servidor.';
+			generalError = 'No se pudo conectar con el servidor.';
 		} finally {
 			validating = false;
 		}
@@ -41,10 +52,17 @@
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-		error = '';
+		fieldErrors = {};
+		generalError = '';
 
-		if (newPassword !== confirmedPassword) {
-			error = 'Las contraseñas no coinciden.';
+		const parsed = confirmResetSchema.safeParse({
+			token,
+			new_password: newPassword,
+			confirmed_password: confirmedPassword
+		});
+
+		if (!parsed.success) {
+			fieldErrors = formatZodErrors(parsed.error);
 			return;
 		}
 
@@ -68,21 +86,28 @@
 			const body = await res.json().catch(() => ({}));
 
 			if (res.status === 400) {
-				error = 'Los datos enviados no son válidos.';
+				const backendErrors = formatBackendErrors(body.errors);
+				if (Object.keys(backendErrors).length > 0) {
+					fieldErrors = backendErrors;
+				} else {
+					generalError = 'Los datos enviados no son válidos.';
+				}
+			} else if (res.status === 404) {
+				generalError = 'El enlace no es válido o ya fue utilizado.';
 			} else if (res.status === 410) {
-				error = 'El enlace ha vencido. Solicita uno nuevo.';
+				generalError = 'El enlace ha vencido. Solicita uno nuevo.';
 				tokenValid = false;
 			} else if (res.status === 422) {
-				error =
+				generalError =
 					body.detail ??
-					'La contraseña no cumple los requisitos de seguridad. Usa al menos 8 caracteres con mayúsculas, minúsculas y números.';
+					'La contraseña no cumple los requisitos de seguridad.';
 			} else if (res.status === 429) {
-				error = 'Demasiados intentos. Espera unos minutos.';
+				generalError = 'Demasiados intentos. Espera unos minutos.';
 			} else {
-				error = 'Error interno. Intenta más tarde.';
+				generalError = 'Error interno. Intenta más tarde.';
 			}
 		} catch {
-			error = 'No se pudo conectar con el servidor.';
+			generalError = 'No se pudo conectar con el servidor.';
 		} finally {
 			loading = false;
 		}
@@ -104,7 +129,7 @@
 			¡Contraseña actualizada correctamente! Ya puedes iniciar sesión con tu nueva contraseña.
 		</div>
 	{:else if !tokenValid}
-		<div class="alert alert-error">{error}</div>
+		<div class="alert alert-error">{generalError}</div>
 		<a href="/" class="btn-back">Solicitar nuevo enlace</a>
 	{:else}
 		<p class="subtitle">
@@ -114,22 +139,34 @@
 			{/if}
 		</p>
 
-		{#if error}
-			<div class="alert alert-error">{error}</div>
+		{#if generalError}
+			<div class="alert alert-error">{generalError}</div>
 		{/if}
 
-		<form onsubmit={handleSubmit}>
+		<form onsubmit={handleSubmit} novalidate>
 			<label for="new-password">Nueva contraseña</label>
 			<input
 				id="new-password"
 				type="password"
 				bind:value={newPassword}
-				placeholder="Mínimo 8 caracteres"
-				required
-				minlength="8"
+				placeholder="Ingresa tu nueva contraseña"
 				disabled={loading}
 				autocomplete="new-password"
+				aria-invalid={fieldErrors.new_password ? 'true' : 'false'}
+				aria-describedby={fieldErrors.new_password ? 'new-password-error' : 'password-requirements'}
 			/>
+			{#if fieldErrors.new_password}
+				<small id="new-password-error" class="field-error">{fieldErrors.new_password}</small>
+			{:else}
+				<ul id="password-requirements" class="requirements">
+					{#each requirementsState as req (req.id)}
+						<li class:met={req.met} class:unmet={!req.met}>
+							<span class="icon">{req.met ? '✓' : '○'}</span>
+							{req.label}
+						</li>
+					{/each}
+				</ul>
+			{/if}
 
 			<label for="confirm-password">Confirmar contraseña</label>
 			<input
@@ -137,11 +174,16 @@
 				type="password"
 				bind:value={confirmedPassword}
 				placeholder="Repite la contraseña"
-				required
-				minlength="8"
 				disabled={loading}
 				autocomplete="new-password"
+				aria-invalid={fieldErrors.confirmed_password ? 'true' : 'false'}
+				aria-describedby={fieldErrors.confirmed_password ? 'confirm-password-error' : undefined}
 			/>
+			{#if fieldErrors.confirmed_password}
+				<small id="confirm-password-error" class="field-error"
+					>{fieldErrors.confirmed_password}</small
+				>
+			{/if}
 
 			<button type="submit" disabled={loading || !newPassword || !confirmedPassword}>
 				{loading ? 'Guardando...' : 'Cambiar contraseña'}
@@ -158,5 +200,43 @@
 		color: #6366f1;
 		font-size: 0.875rem;
 		text-decoration: underline;
+	}
+
+	.field-error {
+		display: block;
+		margin-top: 0.25rem;
+		color: #dc2626;
+		font-size: 0.8125rem;
+	}
+
+	.requirements {
+		list-style: none;
+		padding: 0;
+		margin: 0.5rem 0 1rem;
+		font-size: 0.8125rem;
+		display: grid;
+		gap: 0.25rem;
+	}
+
+	.requirements li {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: #6b7280;
+	}
+
+	.requirements li.met {
+		color: #16a34a;
+	}
+
+	.requirements li.unmet {
+		color: #9ca3af;
+	}
+
+	.requirements .icon {
+		font-weight: 700;
+		width: 1em;
+		display: inline-block;
+		text-align: center;
 	}
 </style>

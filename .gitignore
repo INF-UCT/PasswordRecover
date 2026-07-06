@@ -3,3 +3,6 @@
 
 # Secrets de Kubernetes
 deploy/01-secret.yaml
+
+# Dependencias de Node
+frontend/node_modules/

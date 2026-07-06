@@ -122,13 +122,22 @@ func (h *Handler) ConfirmReset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if body.Token == "" || body.NewPassword == "" || body.ConfirmedPassword == "" {
-		writeError(w, r, http.StatusBadRequest, "invalid-input", "Datos inválidos", "Los campos token, new_password y confirmed_password son requeridos")
+	if body.Token == "" {
+		writeValidationError(w, r, []fieldError{{
+			Field:   "token",
+			Code:    "required",
+			Message: "El campo token es requerido.",
+		}})
 		return
 	}
 
-	if body.NewPassword != body.ConfirmedPassword {
-		writeError(w, r, http.StatusBadRequest, "invalid-input", "Datos inválidos", "Las contraseñas no coinciden")
+	if errs := validatePassword(body.NewPassword); len(errs) > 0 {
+		writeValidationError(w, r, errs)
+		return
+	}
+
+	if mismatch := validatePasswordMatch(body.NewPassword, body.ConfirmedPassword); mismatch != nil {
+		writeValidationError(w, r, []fieldError{*mismatch})
 		return
 	}
 
