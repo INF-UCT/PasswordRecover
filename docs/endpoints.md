@@ -107,7 +107,7 @@ La nueva contraseña debe cumplir todas las reglas siguientes:
 | 4 | Al menos un número             | `missing_digit`          |
 | 5 | Al menos un símbolo especial   | `missing_symbol`         |
 
-Símbolos aceptados: `! @ # $ % ^ & * ( ) _ + - = [ ] { } ; ' : " \ | , . < > / ? ~ \``
+**Letras y dígitos** siguen el estándar Unicode (`\p{Ll}`, `\p{Lu}`, `\p{Nd}`); puedes usar con normalidad `ñ`, `á`, `é`, `ü`. **Símbolos** son una whitelist ASCII cerrada: `! @ # $ % ^ & * ( ) _ + - = [ ] { } ; ' : " \ | , . < > / ? ~ \``. Esto evita homoglyphs y caracteres ambiguos.
 
 Además, `new_password` debe ser igual a `confirmed_password` (código `password_mismatch`).
 

@@ -50,7 +50,7 @@ Payload que envia el usuario desde el link para cambiar su contraseña
 
 La nueva contraseña debe cumplir la **política de contraseñas** del sistema:
 - Mínimo 8 caracteres.
-- Al menos una letra minúscula, una mayúscula y un número.
+- Al menos una letra minúscula, una mayúscula y un número (Unicode: `ñ`, `á`, etc. son válidos).
 - Al menos un símbolo especial (`! @ # $ % ^ & * ( ) _ + - = [ ] { } ; ' : " \ | , . < > / ? ~ \``).
 - `new_password` y `confirmed_password` deben coincidir.
 

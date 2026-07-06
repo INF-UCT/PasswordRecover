@@ -28,7 +28,11 @@ Además, `new_password` debe ser idéntico a `confirmed_password`. Si no coincid
 !  @  #  $  %  ^  &  *  (  )  _  +  -  =  [  ]  {  }  ;  '  :  "  \  |  ,  .  <  >  /  ?  ~  `
 ```
 
-> **Nota:** la lista es deliberadamente cerrada (whitelist ASCII) para evitar edge cases: espacios, comillas tipográficas y caracteres unicode visualmente similares (homoglyphs) **no** cuentan como símbolo válido.
+> **Nota:** la lista de símbolos es deliberadamente cerrada (whitelist ASCII) para evitar edge cases: espacios, comillas tipográficas y caracteres unicode visualmente similares (homoglyphs) **no** cuentan como símbolo válido.
+
+### Letras y dígitos
+
+Las letras y dígitos siguen el estándar Unicode (`\p{Ll}`, `\p{Lu}`, `\p{Nd}`). Puedes usar con total normalidad caracteres como `ñ`, `Ñ`, `á`, `é`, `í`, `ó`, `ú`, `ü` en tu contraseña. Los símbolos, en cambio, son ASCII fijos (ver sección anterior) para evitar homoglyphs.
 
 ---
 

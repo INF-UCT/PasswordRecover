@@ -6,9 +6,9 @@ export const passwordSchema = z
 	.string()
 	.min(1, 'La contraseña es requerida.')
 	.min(8, 'Debe tener al menos 8 caracteres.')
-	.regex(/[a-z]/, 'Debe incluir al menos una letra minúscula.')
-	.regex(/[A-Z]/, 'Debe incluir al menos una letra mayúscula.')
-	.regex(/[0-9]/, 'Debe incluir al menos un número.')
+	.regex(/\p{Ll}/u, 'Debe incluir al menos una letra minúscula.')
+	.regex(/\p{Lu}/u, 'Debe incluir al menos una letra mayúscula.')
+	.regex(/\d/u, 'Debe incluir al menos un número.')
 	.regex(passwordSpecialRegex, 'Debe incluir al menos un símbolo especial.');
 
 export const confirmResetSchema = z
@@ -28,8 +28,10 @@ export const confirmResetSchema = z
  */
 export function formatZodErrors(error) {
 	const fieldErrors = {};
+	if (!error || !Array.isArray(error.issues)) return fieldErrors;
 	for (const issue of error.issues) {
-		const field = issue.path[0];
+		const path = issue.path ?? [];
+		const field = path[0];
 		if (field && !fieldErrors[field]) {
 			fieldErrors[field] = issue.message;
 		}
@@ -55,9 +57,9 @@ export function formatBackendErrors(errors) {
 
 export const passwordRequirements = [
 	{ id: 'length', label: 'Mínimo 8 caracteres', test: (pw) => pw.length >= 8 },
-	{ id: 'lower', label: 'Una letra minúscula', test: (pw) => /[a-z]/.test(pw) },
-	{ id: 'upper', label: 'Una letra mayúscula', test: (pw) => /[A-Z]/.test(pw) },
-	{ id: 'digit', label: 'Un número', test: (pw) => /[0-9]/.test(pw) },
+	{ id: 'lower', label: 'Una letra minúscula', test: (pw) => /\p{Ll}/u.test(pw) },
+	{ id: 'upper', label: 'Una letra mayúscula', test: (pw) => /\p{Lu}/u.test(pw) },
+	{ id: 'digit', label: 'Un número', test: (pw) => /\d/u.test(pw) },
 	{
 		id: 'symbol',
 		label: 'Un símbolo especial (!@#$%^&*…)',
