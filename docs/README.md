@@ -43,7 +43,15 @@ Payload que envia el usuario desde el link para cambiar su contraseña
 ```json
 {
   "token": "550e8400-e29b-41d4-a716-446655440000",
-  "new_password": "1234...",
-  "confirmed_password": "1234..."
+  "new_password": "MiClaveSegura2024!A",
+  "confirmed_password": "MiClaveSegura2024!A"
 }
 ```
+
+La nueva contraseña debe cumplir la **política de contraseñas** del sistema:
+- Mínimo 8 caracteres.
+- Al menos una letra minúscula, una mayúscula y un número (Unicode: `ñ`, `á`, etc. son válidos).
+- Al menos un símbolo especial (`! @ # $ % ^ & * ( ) _ + - = [ ] { } ; ' : " \ | , . < > / ? ~ \``).
+- `new_password` y `confirmed_password` deben coincidir.
+
+Estas reglas se aplican en el frontend (Zod), en el backend (Go) y finalmente en LDAP. Ver `docs/politica-contrasenas.md` para el detalle completo.

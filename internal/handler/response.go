@@ -21,11 +21,12 @@ type response struct {
 }
 
 type errorBody struct {
-	Type     string `json:"type"`
-	Title    string `json:"title"`
-	Status   int    `json:"status"`
-	Detail   string `json:"detail"`
-	Instance string `json:"instance"`
+	Type     string       `json:"type"`
+	Title    string       `json:"title"`
+	Status   int          `json:"status"`
+	Detail   string       `json:"detail"`
+	Instance string       `json:"instance"`
+	Errors   []fieldError `json:"errors,omitempty"`
 }
 
 const errorBaseURL = "https://chpass.inf.uct.cl/api/errors/"
@@ -55,6 +56,17 @@ func writeError(w http.ResponseWriter, r *http.Request, status int, errType, tit
 		Status:   status,
 		Detail:   detail,
 		Instance: r.URL.Path,
+	})
+}
+
+func writeValidationError(w http.ResponseWriter, r *http.Request, errs []fieldError) {
+	writeJSON(w, http.StatusBadRequest, errorBody{
+		Type:     errorBaseURL + "validation",
+		Title:    "Datos inválidos",
+		Status:   http.StatusBadRequest,
+		Detail:   "Los datos enviados no cumplen los requisitos.",
+		Instance: r.URL.Path,
+		Errors:   errs,
 	})
 }
 
