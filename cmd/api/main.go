@@ -11,6 +11,7 @@ import (
 	"chpassword/internal/ldap"
 	"chpassword/internal/mailer"
 	"chpassword/internal/middleware"
+	"chpassword/internal/ramtun"
 	"chpassword/internal/redis"
 )
 
@@ -31,8 +32,9 @@ func main() {
 
 	ldapClient := ldap.New(cfg.LDAP)
 	mailerClient := mailer.New(cfg.SMTP)
+	ramtunClient := ramtun.New(cfg.Ramtun)
 
-	h := handler.New(ldapClient, redisClient, mailerClient, cfg.App.BaseURL, cfg.App.FrontendURL)
+	h := handler.New(ldapClient, redisClient, mailerClient, ramtunClient, cfg.App.BaseURL, cfg.App.FrontendURL)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/v1/password-reset/request", h.RequestReset)

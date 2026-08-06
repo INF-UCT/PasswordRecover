@@ -38,3 +38,10 @@ Este documento lista todas las variables de entorno necesarias para ejecutar el 
 | `SMTP_USER` | Sí | Usuario para autenticarse en el servidor SMTP. | `noreply@inf.uct.cl` |
 | `SMTP_PASSWORD` | Sí | Contraseña del usuario SMTP. | `secret` |
 | `SMTP_FROM` | Sí | Dirección que aparecerá como remitente en los correos enviados. | `noreply@inf.uct.cl` |
+
+## Ramtun
+
+| Variable | Requerida | Descripción | Ejemplo |
+|----------|-----------|-------------|---------|
+| `RAMTUN_HOST` | Sí | Host base del servicio Ramtun, usado para sincronizar el cambio de contraseña. | `https://ramtun.inf.uct.cl` |
+| `RAMTUN_API_KEY` | Sí | API key para autenticarse en Ramtun (se envía como `Authorization: Bearer`). | `secret` |

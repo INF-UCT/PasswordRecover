@@ -34,6 +34,11 @@ spec:
                 secretKeyRef:
                   name: chpassword-secret
                   key: SMTP_PASSWORD
+            - name: RAMTUN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chpassword-secret
+                  key: RAMTUN_API_KEY
           livenessProbe:
             tcpSocket:
               port: 8080
