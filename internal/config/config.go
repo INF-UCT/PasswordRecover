@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	App   AppConfig
-	LDAP  LDAPConfig
-	Redis RedisConfig
-	SMTP  SMTPConfig
+	App    AppConfig
+	LDAP   LDAPConfig
+	Redis  RedisConfig
+	SMTP   SMTPConfig
+	Ramtun RamtunConfig
 }
 
 type AppConfig struct {
@@ -41,6 +42,11 @@ type SMTPConfig struct {
 	User     string
 	Password string
 	From     string
+}
+
+type RamtunConfig struct {
+	Host   string
+	ApiKey string
 }
 
 func Load() (*Config, error) {
@@ -83,6 +89,10 @@ func Load() (*Config, error) {
 			User:     required("SMTP_USER"),
 			Password: required("SMTP_PASSWORD"),
 			From:     required("SMTP_FROM"),
+		},
+		Ramtun: RamtunConfig{
+			Host:   required("RAMTUN_HOST"),
+			ApiKey: required("RAMTUN_API_KEY"),
 		},
 	}
 

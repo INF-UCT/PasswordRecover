@@ -9,6 +9,7 @@ import (
 
 	"chpassword/internal/ldap"
 	"chpassword/internal/mailer"
+	"chpassword/internal/ramtun"
 	"chpassword/internal/redis"
 )
 
@@ -16,15 +17,17 @@ type Handler struct {
 	ldap        *ldap.Client
 	redis       *redis.Client
 	mailer      *mailer.Mailer
+	ramtun      *ramtun.Client
 	baseURL     string
 	frontendURL string
 }
 
-func New(l *ldap.Client, r *redis.Client, m *mailer.Mailer, baseURL, frontendURL string) *Handler {
+func New(l *ldap.Client, r *redis.Client, m *mailer.Mailer, rt *ramtun.Client, baseURL, frontendURL string) *Handler {
 	return &Handler{
 		ldap:        l,
 		redis:       r,
 		mailer:      m,
+		ramtun:      rt,
 		baseURL:     baseURL,
 		frontendURL: frontendURL,
 	}
@@ -169,6 +172,10 @@ func (h *Handler) ConfirmReset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	slog.Info("contraseña actualizada correctamente", "email", email)
+
+	if err := h.ramtun.SyncPassword(r.Context(), email, body.NewPassword); err != nil {
+		slog.Warn("error sincronizando contraseña con ramtun", "email", email, "error", err)
+	}
 
 	if err := h.redis.DeleteToken(r.Context(), body.Token); err != nil {
 		slog.Warn("no se pudo eliminar el token tras cambio exitoso", "token", body.Token, "error", err)

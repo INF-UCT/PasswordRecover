@@ -21,3 +21,5 @@ data:
   SMTP_PORT: "465"
   SMTP_USER: "admin@inf.uct.cl"
   SMTP_FROM: "admin@inf.uct.cl"
+
+  RAMTUN_HOST: "https://api-ramtun.inf.uct.cl"
