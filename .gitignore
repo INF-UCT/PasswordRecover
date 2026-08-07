@@ -8,3 +8,7 @@ deploy/01-secret.yaml
 frontend/node_modules/
 frontend/.svelte-kit/
 frontend/dist/
+
+# Archivos de datos seed
+seed/*.csv
+seed/*.ldif
