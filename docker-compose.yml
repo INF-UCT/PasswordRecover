@@ -33,5 +33,14 @@ services:
       retries: 5
     restart: unless-stopped
 
+  openldap:
+    image: ghcr.io/inf-uct/ldap:latest
+    container_name: dev-ldap
+    ports:
+      - "389:389"
+    volumes:
+      - ./seed/users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/30-users.ldif
+    command: "--copy-service"
+    
 volumes:
   redis_data:
